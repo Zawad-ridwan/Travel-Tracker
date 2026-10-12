@@ -1,0 +1,16 @@
+# Store all text files with LF line endings, on every computer.
+# Stops Git's "LF will be replaced by CRLF" warnings on Windows
+# and keeps Prettier and ESLint happy.
+* text=auto eol=lf
+
+# Binary files: never touch them
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.woff binary
+*.woff2 binary
