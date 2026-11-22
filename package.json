@@ -1,6 +1,6 @@
 {
   "name": "travel-tracker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Travel Tracker — plan trips, track journeys and collect stamps from around the world.",
@@ -20,7 +20,8 @@
     "typecheck": "npm run typecheck -w shared && npm run typecheck -w server && npm run typecheck -w client",
     "test": "npm run test -w server && npm run test -w client",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "make-admin": "npm run make-admin -w server --"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

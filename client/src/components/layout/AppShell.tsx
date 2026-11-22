@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ScrollRestoration, useLocation, useOutlet } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
+import { VerifyEmailBanner } from '@/features/auth/VerifyEmailBanner';
 import { BottomTabBar } from './BottomTabBar';
 import { Sidebar } from './Sidebar';
 import { ToolkitDrawer } from './ToolkitDrawer';
@@ -37,6 +38,7 @@ export function AppShell() {
           id="main"
           className="mx-auto w-full max-w-6xl px-4 pb-32 pt-5 sm:px-6 md:px-10 md:pb-16 md:pt-10"
         >
+          <VerifyEmailBanner />
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.pathname}

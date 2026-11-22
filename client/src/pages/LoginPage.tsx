@@ -1,56 +1,73 @@
-import { useState, type FormEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { Lock, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { toast } from 'sonner';
+import { loginSchema, type LoginInput } from '@tt/shared';
+import { PasswordInput } from '@/components/forms/PasswordInput';
 import { Button, Input } from '@/components/ui';
+import { useSetUser } from '@/features/auth/useAuth';
+import { api } from '@/lib/api';
+import { firstName } from '@/lib/format';
+import { showServerErrors } from '@/lib/forms';
 
 export default function LoginPage() {
-  const [loading, setLoading] = useState(false);
+  const setUser = useSetUser();
 
-  // Phase 1 replaces this with a real call to POST /api/auth/login
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast('Real accounts arrive in Phase 1', {
-        description: 'This form is ready; the server part comes next.',
-      });
-    }, 600);
-  };
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const login = useMutation({
+    mutationFn: api.auth.login,
+    onSuccess: ({ user }) => {
+      // Saving the user makes the GuestOnly guard move on to the right page
+      setUser(user);
+      toast.success(`Welcome back, ${firstName(user.name)}!`);
+    },
+    onError: (error) => showServerErrors(error, setError),
+  });
 
   return (
     <>
       <h1 className="text-4xl font-semibold">Welcome back</h1>
       <p className="mt-2 text-muted">Log in to continue your journey.</p>
 
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+      <form
+        onSubmit={handleSubmit((data) => login.mutate(data))}
+        className="mt-8 flex flex-col gap-4"
+        noValidate
+      >
         <Input
           label="Email"
           type="email"
-          name="email"
           autoComplete="email"
           placeholder="you@example.com"
           icon={<Mail />}
-          required
+          error={errors.email?.message}
+          {...register('email')}
         />
-        <Input
+        <PasswordInput
           label="Password"
-          type="password"
-          name="password"
           autoComplete="current-password"
           placeholder="Your password"
-          icon={<Lock />}
-          required
+          error={errors.password?.message}
+          {...register('password')}
         />
-        <button
-          type="button"
+        <Link
+          to="/forgot-password"
           className="self-end text-sm font-semibold text-primary hover:underline"
-          onClick={() => toast('Password reset arrives in Phase 1')}
         >
           Forgot password?
-        </button>
-        <Button type="submit" size="lg" block loading={loading}>
+        </Link>
+        <Button type="submit" size="lg" block loading={login.isPending}>
           Log in
         </Button>
       </form>

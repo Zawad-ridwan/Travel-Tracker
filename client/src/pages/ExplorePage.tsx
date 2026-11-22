@@ -24,15 +24,10 @@ import {
   Stamp,
 } from '@/components/ui';
 import { FEATURED_DESTINATIONS } from '@/data/sample';
+import { useAuth } from '@/features/auth/useAuth';
 import { cn } from '@/lib/cn';
-
-function greeting(date = new Date()) {
-  const hour = date.getHours();
-  if (hour < 5) return 'Up late';
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
-}
+import { firstName, greeting, levelProgress, levelTitle } from '@/lib/format';
+import { XP_PER_LEVEL } from '@tt/shared';
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -41,7 +36,10 @@ const fadeUp = {
 
 export default function ExplorePage() {
   const { setOpen: openToolkit } = useToolkit();
+  const { user } = useAuth();
   const [query, setQuery] = useState('');
+  const xp = user?.xp ?? 0;
+  const level = user?.level ?? 1;
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
@@ -66,7 +64,7 @@ export default function ExplorePage() {
       >
         <div className="relative z-10 max-w-xl">
           <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted">
-            <Sparkles className="size-4 text-sun" /> {greeting()}, traveller
+            <Sparkles className="size-4 text-sun" /> {greeting()}, {user ? firstName(user.name) : 'traveller'}
           </p>
           <h1 className="text-5xl font-semibold leading-[1.05] sm:text-6xl">
             Where to <span className="font-black text-primary">next?</span>
@@ -126,6 +124,22 @@ export default function ExplorePage() {
         </ul>
       </motion.section>
 
+      {user && !user.onboardingCompleted && (
+        <motion.div {...fadeUp} transition={{ delay: 0.08 }}>
+          <Card className="border-primary/30 bg-primary-soft/40">
+            <CardContent className="flex flex-wrap items-center gap-4">
+              <Sparkles className="size-6 text-primary" />
+              <p className="flex-1 font-semibold">
+                Finish setting up: 3 quick questions tune Explore to you, plus 25 XP.
+              </p>
+              <Link to="/onboarding" className={buttonVariants()}>
+                Let&apos;s go
+              </Link>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Next trip + passport + level */}
       <motion.section {...fadeUp} transition={{ delay: 0.1 }} className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-1">
@@ -159,21 +173,32 @@ export default function ExplorePage() {
         <Card>
           <CardContent>
             <div className="flex items-center justify-between">
-              <Badge tone="sun">Level 1</Badge>
-              <span className="text-sm font-semibold text-muted">0 / 100 XP</span>
+              <Badge tone="sun">Level {level}</Badge>
+              <span className="text-sm font-semibold text-muted">
+                {xp % XP_PER_LEVEL} / {XP_PER_LEVEL} XP
+              </span>
             </div>
-            <h2 className="mt-3 text-2xl font-semibold">Curious Explorer</h2>
+            <h2 className="mt-3 text-2xl font-semibold">{levelTitle(level)}</h2>
             <div
               className="mt-4 h-3 overflow-hidden rounded-full bg-surface-2"
               role="progressbar"
               aria-label="Experience points"
-              aria-valuenow={0}
+              aria-valuenow={Math.round(levelProgress(xp))}
               aria-valuemin={0}
               aria-valuemax={100}
             >
-              <div className="h-full w-[4%] rounded-full bg-sun" />
+              <div
+                className="h-full rounded-full bg-sun transition-[width] duration-700"
+                style={{ width: `${Math.max(4, levelProgress(xp))}%` }}
+              />
             </div>
-            <p className="mt-3 text-sm text-muted">Plan a trip to earn your first 25 XP.</p>
+            <p className="mt-3 text-sm text-muted">
+              {!user
+                ? 'Sign up to start earning XP.'
+                : !user.emailVerified
+                  ? 'Confirm your email to earn 25 XP.'
+                  : 'Trips and check-ins earn more XP soon.'}
+            </p>
           </CardContent>
         </Card>
       </motion.section>
