@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Travel Tracker logo">
+  <title>Travel Tracker</title>
+  <defs>
+    <linearGradient id="tt-sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#17384A"/>
+      <stop offset="0.55" stop-color="#1A5B60"/>
+      <stop offset="1" stop-color="#1F7A73"/>
+    </linearGradient>
+    <clipPath id="tt-globe">
+      <circle cx="256" cy="256" r="166"/>
+    </clipPath>
+  </defs>
+
+  <!-- Passport-stamp perforation (matches the stamps in the app) -->
+  <circle cx="256" cy="256" r="249" fill="none" stroke="#C8492F" stroke-width="5" stroke-dasharray="10 7" stroke-linecap="round"/>
+
+  <!-- Compass bezel -->
+  <circle cx="256" cy="256" r="236" fill="#1F2A37"/>
+  <circle cx="256" cy="256" r="218" fill="none" stroke="#E3A93B" stroke-width="6"/>
+  <circle cx="256" cy="256" r="173" fill="none" stroke="#E3A93B" stroke-width="5"/>
+
+  <!-- Compass points (N, E, S, W). The dark outline cuts small gaps in the rings. -->
+  <clipPath id="tt-bezel"><circle cx="256" cy="256" r="236"/></clipPath>
+  <g clip-path="url(#tt-bezel)" fill="#1F2A37" stroke="#1F2A37" stroke-width="12" stroke-linejoin="round">
+    <path d="M256 18 Q259 52 267 63 Q259 72 256 98 Q253 72 245 63 Q253 52 256 18 Z"/>
+    <path d="M494 256 Q460 259 449 267 Q440 259 414 256 Q440 253 449 245 Q460 253 494 256 Z"/>
+    <path d="M256 494 Q253 460 245 449 Q253 440 256 414 Q259 440 267 449 Q259 460 256 494 Z"/>
+    <path d="M18 256 Q52 253 63 245 Q72 253 98 256 Q72 259 63 267 Q52 259 18 256 Z"/>
+  </g>
+  <!-- Globe -->
+  <circle cx="256" cy="256" r="166" fill="url(#tt-sea)"/>
+  <g clip-path="url(#tt-globe)" fill="none" stroke="#FBF7F0" stroke-opacity="0.12" stroke-width="2.5">
+    <ellipse cx="256" cy="256" rx="72" ry="166"/>
+    <ellipse cx="256" cy="256" rx="132" ry="166"/>
+    <path d="M90 196 Q256 176 422 196"/>
+    <path d="M90 256 H422"/>
+    <path d="M90 316 Q256 336 422 316"/>
+  </g>
+
+  <g fill="#E3A93B">
+    <path d="M256 18 Q259 52 267 63 Q259 72 256 98 Q253 72 245 63 Q253 52 256 18 Z"/>
+    <path d="M494 256 Q460 259 449 267 Q440 259 414 256 Q440 253 449 245 Q460 253 494 256 Z"/>
+    <path d="M256 494 Q253 460 245 449 Q253 440 256 414 Q259 440 267 449 Q259 460 256 494 Z"/>
+    <path d="M18 256 Q52 253 63 245 Q72 253 98 256 Q72 259 63 267 Q52 259 18 256 Z"/>
+  </g>
+
+  <!-- Winding trail: the journey -->
+  <g clip-path="url(#tt-globe)" fill="none" stroke-linecap="round">
+    <path d="M342 287 C330 302 292 302 252 307 C214 312 196 328 208 345 C221 363 270 356 270 386 C270 405 246 417 214 424" stroke="#E8664A" stroke-width="11"/>
+    <path d="M342 287 C330 302 292 302 252 307 C214 312 196 328 208 345 C221 363 270 356 270 386 C270 405 246 417 214 424" stroke="#FBF7F0" stroke-width="2" stroke-dasharray="7 8" stroke-opacity="0.85"/>
+  </g>
+
+  <!-- Serif T -->
+  <path fill="#E3A93B" d="M216 116 H296 V148 H291 Q288 129 276 129 H262.5 V204 H276 V213 H236 V204 H249.5 V129 H236 Q224 129 221 148 H216 Z"/>
+
+  <!-- Compass needle: small diamond under the T -->
+  <path d="M256 220 V238" stroke="#E3A93B" stroke-width="3" stroke-linecap="round"/>
+  <path fill="#E3A93B" d="M256 240 L270 256 L256 272 L242 256 Z"/>
+
+  <!-- Location pin -->
+  <path fill="#E8664A" d="M344 186 a31 31 0 0 1 31 31 c0 23 -31 56 -31 56 s-31 -33 -31 -56 a31 31 0 0 1 31 -31 z"/>
+  <circle cx="344" cy="217" r="11.5" fill="#17384A"/>
+</svg>

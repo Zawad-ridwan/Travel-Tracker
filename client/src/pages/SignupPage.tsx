@@ -1,61 +1,83 @@
-import { useState, type FormEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { Lock, Mail, User } from 'lucide-react';
+import { Mail, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { signupSchema, type SignupInput } from '@tt/shared';
+import { PasswordInput } from '@/components/forms/PasswordInput';
 import { Button, Input } from '@/components/ui';
+import { useSetUser } from '@/features/auth/useAuth';
+import { api } from '@/lib/api';
+import { firstName } from '@/lib/format';
+import { showServerErrors } from '@/lib/forms';
 
 export default function SignupPage() {
-  const [loading, setLoading] = useState(false);
+  const setUser = useSetUser();
 
-  // Phase 1 replaces this with a real call to POST /api/auth/signup
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast('Real accounts arrive in Phase 1', {
-        description: 'This form is ready; the server part comes next.',
-      });
-    }, 600);
-  };
+  const {
+    register,
+    handleSubmit,
+    setError,
+    watch,
+    formState: { errors },
+  } = useForm<SignupInput>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: { name: '', email: '', password: '' },
+  });
+
+  const signup = useMutation({
+    mutationFn: api.auth.signup,
+    onSuccess: ({ user }) => {
+      // Saving the user makes the GuestOnly guard move on to /onboarding
+      setUser(user);
+      toast.success(`Welcome, ${firstName(user.name)}! Your passport is ready.`);
+    },
+    onError: (error) => showServerErrors(error, setError),
+  });
 
   return (
     <>
       <h1 className="text-4xl font-semibold">Start your passport</h1>
       <p className="mt-2 text-muted">Free forever. Your first stamp is waiting.</p>
 
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+      <form
+        onSubmit={handleSubmit((data) => signup.mutate(data))}
+        className="mt-8 flex flex-col gap-4"
+        noValidate
+      >
         <Input
           label="Name"
-          name="name"
           autoComplete="name"
           placeholder="What should we call you?"
           icon={<User />}
-          required
+          error={errors.name?.message}
+          {...register('name')}
         />
         <Input
           label="Email"
           type="email"
-          name="email"
           autoComplete="email"
           placeholder="you@example.com"
           icon={<Mail />}
-          required
+          error={errors.email?.message}
+          {...register('email')}
         />
-        <Input
+        <PasswordInput
           label="Password"
-          type="password"
-          name="password"
           autoComplete="new-password"
           placeholder="At least 8 characters"
-          hint="Use 8 or more characters with a mix of letters and numbers."
-          icon={<Lock />}
-          minLength={8}
-          required
+          hint="8 or more characters, with at least one letter and one number."
+          error={errors.password?.message}
+          strengthOf={watch('password')}
+          {...register('password')}
         />
-        <Button type="submit" size="lg" block loading={loading} className="mt-2">
+        <Button type="submit" size="lg" block loading={signup.isPending} className="mt-2">
           Create account
         </Button>
+        <p className="text-center text-xs text-muted">
+          By signing up you agree to use Travel Tracker kindly and honestly.
+        </p>
       </form>
 
       <p className="mt-8 text-center text-muted">

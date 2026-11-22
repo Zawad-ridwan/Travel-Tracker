@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import { mockApi } from './mockApi';
 
 afterEach(() => cleanup());
 
@@ -20,3 +21,8 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
+
+/** By default the fake API says "not logged in". Tests can replace this with mockApi(). */
+beforeEach(() => {
+  mockApi({});
+});

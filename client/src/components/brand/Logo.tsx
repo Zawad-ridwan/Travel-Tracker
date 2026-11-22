@@ -1,23 +1,20 @@
 import { APP_NAME } from '@tt/shared';
 import { cn } from '@/lib/cn';
 
-/** The stamp-and-plane mark. */
-export function LogoMark({ className }: { className?: string }) {
+/**
+ * The Travel Tracker emblem.
+ * - Small sizes (nav bars): the simplified mark, /favicon.svg
+ * - Large sizes (hero, auth pages): the full detailed logo, /logo.svg
+ */
+export function LogoMark({ className, detailed }: { className?: string; detailed?: boolean }) {
   return (
-    <svg viewBox="0 0 64 64" aria-hidden className={cn('size-9 shrink-0', className)}>
-      <circle
-        cx="32"
-        cy="32"
-        r="29"
-        fill="var(--surface)"
-        stroke="var(--primary)"
-        strokeWidth="4"
-        strokeDasharray="6 3"
-      />
-      <circle cx="32" cy="32" r="21" fill="none" stroke="var(--primary)" strokeWidth="2.5" />
-      <path d="M20 36 L44 26 L38 42 L33 36 Z" fill="var(--primary)" />
-      <path d="M33 36 L44 26" stroke="var(--surface)" strokeWidth="1.5" />
-    </svg>
+    <img
+      src={detailed ? '/logo.svg' : '/favicon.svg'}
+      alt=""
+      aria-hidden
+      draggable={false}
+      className={cn('size-9 shrink-0 select-none', className)}
+    />
   );
 }
 
