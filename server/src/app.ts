@@ -12,7 +12,9 @@ import { errorHandler, notFound } from './middleware/errors';
 import { apiLimiter, requireClientHeader } from './middleware/security';
 import { adminRouter } from './routes/admin';
 import { authRouter } from './routes/auth';
+import { currencyRouter } from './routes/currency';
 import { healthRouter } from './routes/health';
+import { tripsRouter } from './routes/trips';
 import { usersRouter } from './routes/users';
 
 /** Where `npm run build` puts the React app (travel-tracker/client/dist). */
@@ -59,6 +61,8 @@ export function createApp() {
   api.use('/auth', authRouter);
   api.use('/users', usersRouter);
   api.use('/admin', adminRouter);
+  api.use('/trips', tripsRouter);
+  api.use('/currency', currencyRouter);
   api.use(notFound);
   app.use(API_PREFIX, api);
 

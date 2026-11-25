@@ -34,10 +34,12 @@ export type TravelStyle = (typeof TRAVEL_STYLES)[number]['id'];
 
 export const TRAVEL_STYLE_IDS = TRAVEL_STYLES.map((s) => s.id) as [TravelStyle, ...TravelStyle[]];
 
-/** XP awarded for actions. More arrive with trips (Phase 2) and check-ins (Phase 4). */
+/** XP awarded for actions. More arrive with check-ins and journeys (Phase 4). */
 export const XP_REWARDS = {
   verifyEmail: 25,
   completeOnboarding: 25,
+  /** Taken back if the trip is deleted, so it cannot be farmed. */
+  planTrip: 20,
 } as const;
 
 export const XP_PER_LEVEL = 100;

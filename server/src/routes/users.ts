@@ -18,6 +18,7 @@ import { requireAuth } from '../middleware/auth';
 import { HttpError } from '../middleware/errors';
 import { Session } from '../models/Session';
 import { Token } from '../models/Token';
+import { Trip } from '../models/Trip';
 import { User } from '../models/User';
 import { checkPassword, hashPassword } from '../services/auth';
 
@@ -137,6 +138,7 @@ usersRouter.delete('/me', async (req, res) => {
   await Promise.all([
     Session.deleteMany({ userId: user._id }),
     Token.deleteMany({ userId: user._id }),
+    Trip.deleteMany({ ownerId: user._id }),
   ]);
   await user.deleteOne();
   clearAuthCookies(res);

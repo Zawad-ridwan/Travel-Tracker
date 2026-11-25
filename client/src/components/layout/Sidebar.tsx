@@ -53,7 +53,7 @@ export function Sidebar() {
         <Logo />
       </Link>
 
-      <Link to="/trips" className={cn(buttonVariants({ block: true }), 'mb-6')}>
+      <Link to={user ? '/trips?new=1' : '/trips'} className={cn(buttonVariants({ block: true }), 'mb-6')}>
         <Plus /> Plan a trip
       </Link>
 

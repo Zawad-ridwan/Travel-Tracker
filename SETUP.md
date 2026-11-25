@@ -51,9 +51,13 @@ Without it, verification and password-reset links are **printed in the terminal*
 To send real emails (300 a day free):
 
 1. Sign up at <https://www.brevo.com>.
-2. **Senders, Domains & Dedicated IPs → Senders → Add a sender.** Use your own email
-   (e.g. your Gmail). Brevo sends a confirmation email; click the link.
-3. **SMTP & API → API Keys → Generate a new API key.** Copy it (starts with `xkeysib-`).
+2. Check your sender. The email you signed up with is usually already a confirmed sender.
+   To see the list, open the **account menu at the top right** (your organisation's name) →
+   **Senders, domains & dedicated IPs → Senders**, or **Transactional → Settings → Senders**
+   (Brevo moves its menus now and then). To add another address, click **Add a sender**
+   and click the link in the confirmation email Brevo sends.
+3. **Account menu → SMTP & API → API keys → Generate a new API key.** Copy it straight away
+   (it starts with `xkeysib-` and is shown only once).
 4. In `server/.env`:
 
    ```
@@ -109,3 +113,4 @@ This uses the database in `server/.env`, so it also works for the live site's da
 | `querySrv ENOTFOUND` | Your network blocks DNS lookups for `mongodb+srv`. Try another network, or in Atlas choose **Connect → Drivers** with an older driver version to get a `mongodb://` address. |
 | Tests are slow the first time | They download a small MongoDB for testing (~100 MB) once. |
 | Sign-up works but no email arrives | Without Brevo, look in the terminal for the link. With Brevo, check spam and that the sender is confirmed. |
+| "Exchange rates are unavailable" | The server could not reach open.er-api.com or api.frankfurter.dev (a firewall or no internet). Expenses in the trip's own currency still work. |

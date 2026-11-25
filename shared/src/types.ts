@@ -1,4 +1,5 @@
 import type { TravelStyle, USER_ROLES } from './constants';
+import type { ExpenseCategory, ItemKind, PackingCategory, TripCover } from './trips';
 
 export type UserRole = (typeof USER_ROLES)[number];
 
@@ -77,4 +78,96 @@ export interface AdminStats {
   };
   /** Sign-ups per day for the last 14 days, oldest first. */
   signupsByDay: { date: string; count: number }[];
+}
+
+/* ---------------- Trips (Phase 2) ---------------- */
+
+/** One stop or plan in the itinerary. */
+export interface TripItem {
+  id: string;
+  /** The day it happens, or null while it is still an idea. */
+  date: string | null;
+  /** Position within its day (0 = first). */
+  order: number;
+  kind: ItemKind;
+  title: string;
+  /** "HH:mm" or null */
+  time: string | null;
+  endTime: string | null;
+  location: string;
+  notes: string;
+  /** Planned cost in the trip's currency. */
+  cost: number | null;
+}
+
+export interface Expense {
+  id: string;
+  title: string;
+  category: ExpenseCategory;
+  /** What was paid, in the currency it was paid in. */
+  amount: number;
+  currency: string;
+  /** The same amount in the trip's currency. */
+  convertedAmount: number;
+  /** 1 unit of `currency` in the trip's currency, when it was converted. */
+  rate: number;
+  date: string;
+  createdAt: string;
+}
+
+export interface PackingItem {
+  id: string;
+  label: string;
+  category: PackingCategory;
+  packed: boolean;
+}
+
+interface TripBase {
+  id: string;
+  title: string;
+  destination: string;
+  countryCode: string | null;
+  /** YYYY-MM-DD */
+  startDate: string;
+  endDate: string;
+  /** The currency the budget is kept in. */
+  currency: string;
+  budget: number;
+  travelers: number;
+  cover: TripCover;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** A whole trip, as shown on its own page. */
+export interface Trip extends TripBase {
+  notes: string;
+  items: TripItem[];
+  expenses: Expense[];
+  packing: PackingItem[];
+}
+
+/** A trip card in the list: totals instead of every detail. */
+export interface TripSummary extends TripBase {
+  spent: number;
+  plannedCost: number;
+  itemCount: number;
+  packing: { total: number; packed: number };
+}
+
+export interface TripResponse {
+  trip: Trip;
+}
+
+export interface TripListResponse {
+  trips: TripSummary[];
+}
+
+/** GET /api/currency/rates — how many of each currency one US dollar buys. */
+export interface ExchangeRates {
+  base: 'USD';
+  rates: Record<string, number>;
+  /** When the provider last updated the rates (ISO time). */
+  updatedAt: string;
+  source: 'exchangerate-api' | 'frankfurter';
 }
