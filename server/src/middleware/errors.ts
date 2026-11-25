@@ -46,6 +46,20 @@ function describe(err: unknown): { status: number; message: string; code: string
     }
     return { status: 400, message: 'The upload could not be read', code: 'BAD_UPLOAD' };
   }
+  // Two saves of the same trip raced each other (e.g. two tabs)
+  if (e?.name === 'VersionError') {
+    return {
+      status: 409,
+      message: 'This changed somewhere else at the same moment. Refresh and try again.',
+      code: 'CONFLICT',
+    };
+  }
+  if (e?.name === 'CastError') {
+    return { status: 400, message: 'That id is not valid', code: 'BAD_ID' };
+  }
+  if (e?.name === 'ValidationError') {
+    return { status: 400, message: 'Some values are not valid', code: 'VALIDATION_ERROR' };
+  }
   // MongoDB duplicate key, e.g. two sign-ups with the same email at the same moment
   if (e?.code === 11000) {
     return { status: 409, message: 'That already exists', code: 'DUPLICATE' };

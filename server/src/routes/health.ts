@@ -10,7 +10,7 @@ healthRouter.get('/', (_req, res) => {
   const body: HealthResponse = {
     status: database === 'connected' ? 'ok' : 'degraded',
     service: 'travel-tracker-api',
-    version: process.env.npm_package_version ?? '0.2.0',
+    version: process.env.npm_package_version ?? '0.3.0',
     database,
     uptimeSeconds: Math.round(process.uptime()),
     timestamp: new Date().toISOString(),

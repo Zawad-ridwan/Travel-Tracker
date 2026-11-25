@@ -15,6 +15,7 @@ import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import SettingsPage from '@/pages/SettingsPage';
 import SignupPage from '@/pages/SignupPage';
 import StyleguidePage from '@/pages/StyleguidePage';
+import TripPage from '@/pages/TripPage';
 import TripsPage from '@/pages/TripsPage';
 import VerifyEmailPage from '@/pages/VerifyEmailPage';
 
@@ -32,7 +33,10 @@ export const routes: RouteObject[] = [
       // Logged-in users only
       {
         element: <RequireAuth />,
-        children: [{ path: 'me/settings', element: <SettingsPage /> }],
+        children: [
+          { path: 'trips/:tripId', element: <TripPage /> },
+          { path: 'me/settings', element: <SettingsPage /> },
+        ],
       },
       // Admins only
       {

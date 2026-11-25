@@ -1,7 +1,9 @@
-import { afterAll, afterEach, beforeAll } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, vi } from 'vitest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server-core';
+import { setRatesForTests } from '../lib/currency';
 import { testOutbox } from '../lib/email';
+import { TEST_RATES } from './rates';
 
 let mongo: MongoMemoryServer;
 
@@ -12,7 +14,12 @@ beforeAll(async () => {
   await Promise.all(Object.values(mongoose.models).map((model) => model.init()));
 });
 
+beforeEach(() => {
+  setRatesForTests(TEST_RATES);
+});
+
 afterEach(async () => {
+  vi.unstubAllGlobals();
   const collections = await mongoose.connection.db!.collections();
   await Promise.all(collections.map((c) => c.deleteMany({})));
   testOutbox.length = 0;

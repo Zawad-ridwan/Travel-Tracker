@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import {
   ArrowLeftRight,
@@ -25,7 +25,9 @@ import {
 } from '@/components/ui';
 import { FEATURED_DESTINATIONS } from '@/data/sample';
 import { useAuth } from '@/features/auth/useAuth';
-import { cn } from '@/lib/cn';
+import { pickNextTrip } from '@/features/trips/display';
+import { NextTripCard } from '@/features/trips/NextTripCard';
+import { useTripList } from '@/features/trips/useTrips';
 import { firstName, greeting, levelProgress, levelTitle } from '@/lib/format';
 import { XP_PER_LEVEL } from '@tt/shared';
 
@@ -37,6 +39,8 @@ const fadeUp = {
 export default function ExplorePage() {
   const { setOpen: openToolkit } = useToolkit();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { data: trips } = useTripList();
   const [query, setQuery] = useState('');
   const xp = user?.xp ?? 0;
   const level = user?.level ?? 1;
@@ -48,10 +52,17 @@ export default function ExplorePage() {
     });
   };
 
+  const addExpense = () => {
+    const next = trips ? pickNextTrip(trips) : undefined;
+    if (next) return navigate(`/trips/${next.id}?tab=budget&add=expense`);
+    toast('Plan a trip first', { description: 'Expenses belong to a trip.' });
+    navigate(user ? '/trips?new=1' : '/trips');
+  };
+
   const quickActions = [
-    { label: 'Plan a trip', icon: Plus, onClick: () => toast('Trip planning arrives in Phase 2') },
+    { label: 'Plan a trip', icon: Plus, onClick: () => navigate(user ? '/trips?new=1' : '/trips') },
     { label: 'Check in', icon: MapPin, onClick: () => toast('Check-ins arrive in Phase 4') },
-    { label: 'Add expense', icon: Receipt, onClick: () => toast('Budgets arrive in Phase 2') },
+    { label: 'Add expense', icon: Receipt, onClick: addExpense },
     { label: 'Convert money', icon: ArrowLeftRight, onClick: () => openToolkit(true) },
   ];
 
@@ -142,18 +153,7 @@ export default function ExplorePage() {
 
       {/* Next trip + passport + level */}
       <motion.section {...fadeUp} transition={{ delay: 0.1 }} className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
-          <CardContent className="flex h-full flex-col">
-            <Badge tone="primary" className="self-start">
-              Next trip
-            </Badge>
-            <h2 className="mt-4 text-2xl font-semibold">No trip planned yet</h2>
-            <p className="mt-1 text-muted">Your countdown appears here once you plan one.</p>
-            <Link to="/trips" className={cn(buttonVariants({ variant: 'soft' }), 'mt-auto self-start')}>
-              <Plus /> Plan your first trip
-            </Link>
-          </CardContent>
-        </Card>
+        <NextTripCard />
 
         <Card>
           <CardContent className="flex items-center gap-5">
@@ -197,7 +197,7 @@ export default function ExplorePage() {
                 ? 'Sign up to start earning XP.'
                 : !user.emailVerified
                   ? 'Confirm your email to earn 25 XP.'
-                  : 'Trips and check-ins earn more XP soon.'}
+                  : 'Plan a trip to earn 20 XP.'}
             </p>
           </CardContent>
         </Card>

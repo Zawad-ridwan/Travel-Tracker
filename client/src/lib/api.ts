@@ -5,16 +5,29 @@ import {
   type AdminUserRow,
   type ApiErrorResponse,
   type ChangePasswordInput,
+  type CreateExpenseInput,
+  type CreateItemInput,
+  type CreatePackingInput,
+  type CreateTripInput,
   type DeleteAccountInput,
+  type ExchangeRates,
   type ForgotPasswordInput,
   type HealthResponse,
   type LoginInput,
   type MessageResponse,
   type OnboardingInput,
+  type PackingTemplateInput,
   type Paginated,
+  type ReorderItineraryInput,
   type ResetPasswordInput,
   type SignupInput,
+  type TripListResponse,
+  type TripResponse,
+  type UpdateExpenseInput,
+  type UpdateItemInput,
+  type UpdatePackingInput,
   type UpdateProfileInput,
+  type UpdateTripInput,
   type UserResponse,
 } from '@tt/shared';
 
@@ -56,14 +69,14 @@ function refreshSession(): Promise<boolean> {
 }
 
 interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   /** Set to false for requests that must not trigger a refresh (e.g. login). */
   retryOnExpired?: boolean;
 }
 
-/** Small wrapper around fetch: JSON in, JSON out, cookies included, errors thrown as ApiError. */
-export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
+/** Sends a request (refreshing an expired login once) and throws ApiError for any failure. */
+async function request(path: string, options: RequestOptions = {}): Promise<Response> {
   const { method = 'GET', body, retryOnExpired = true } = options;
   const isForm = body instanceof FormData;
 
@@ -107,8 +120,30 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
       err?.error.fields,
     );
   }
+  return res;
+}
 
+/** Small wrapper around fetch: JSON in, JSON out, cookies included, errors thrown as ApiError. */
+export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const res = await request(path, options);
   return (await res.json()) as T;
+}
+
+/** Downloads a file from the API and hands it to the browser as a download. */
+export async function apiDownload(path: string, fallbackName: string) {
+  const res = await request(path);
+  const blob = await res.blob();
+  const header = res.headers.get('content-disposition') ?? '';
+  const name = /filename="?([^";]+)"?/.exec(header)?.[1] ?? fallbackName;
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /** Every API call the app makes, in one place. */
@@ -148,6 +183,47 @@ export const api = {
       apiFetch<MessageResponse>('/users/me/password', { method: 'POST', body: data }),
     deleteAccount: (data: DeleteAccountInput) =>
       apiFetch<MessageResponse>('/users/me', { method: 'DELETE', body: data }),
+  },
+
+  trips: {
+    list: () => apiFetch<TripListResponse>('/trips'),
+    get: (id: string) => apiFetch<TripResponse>(`/trips/${id}`),
+    create: (data: CreateTripInput) => apiFetch<TripResponse>('/trips', { method: 'POST', body: data }),
+    update: (id: string, data: UpdateTripInput) =>
+      apiFetch<TripResponse>(`/trips/${id}`, { method: 'PATCH', body: data }),
+    remove: (id: string) => apiFetch<MessageResponse>(`/trips/${id}`, { method: 'DELETE' }),
+    downloadCalendar: (id: string) => apiDownload(`/trips/${id}/calendar.ics`, 'trip.ics'),
+
+    addItem: (id: string, data: CreateItemInput) =>
+      apiFetch<TripResponse>(`/trips/${id}/items`, { method: 'POST', body: data }),
+    updateItem: (id: string, itemId: string, data: UpdateItemInput) =>
+      apiFetch<TripResponse>(`/trips/${id}/items/${itemId}`, { method: 'PATCH', body: data }),
+    removeItem: (id: string, itemId: string) =>
+      apiFetch<TripResponse>(`/trips/${id}/items/${itemId}`, { method: 'DELETE' }),
+    reorder: (id: string, data: ReorderItineraryInput) =>
+      apiFetch<TripResponse>(`/trips/${id}/itinerary`, { method: 'PUT', body: data }),
+
+    addExpense: (id: string, data: CreateExpenseInput) =>
+      apiFetch<TripResponse>(`/trips/${id}/expenses`, { method: 'POST', body: data }),
+    updateExpense: (id: string, expenseId: string, data: UpdateExpenseInput) =>
+      apiFetch<TripResponse>(`/trips/${id}/expenses/${expenseId}`, { method: 'PATCH', body: data }),
+    removeExpense: (id: string, expenseId: string) =>
+      apiFetch<TripResponse>(`/trips/${id}/expenses/${expenseId}`, { method: 'DELETE' }),
+
+    addPacking: (id: string, data: CreatePackingInput) =>
+      apiFetch<TripResponse>(`/trips/${id}/packing`, { method: 'POST', body: data }),
+    addPackingTemplate: (id: string, data: PackingTemplateInput) =>
+      apiFetch<TripResponse>(`/trips/${id}/packing/template`, { method: 'POST', body: data }),
+    unpackAll: (id: string) =>
+      apiFetch<TripResponse>(`/trips/${id}/packing/unpack-all`, { method: 'POST' }),
+    updatePacking: (id: string, itemId: string, data: UpdatePackingInput) =>
+      apiFetch<TripResponse>(`/trips/${id}/packing/${itemId}`, { method: 'PATCH', body: data }),
+    removePacking: (id: string, itemId: string) =>
+      apiFetch<TripResponse>(`/trips/${id}/packing/${itemId}`, { method: 'DELETE' }),
+  },
+
+  currency: {
+    rates: () => apiFetch<ExchangeRates>('/currency/rates'),
   },
 
   admin: {

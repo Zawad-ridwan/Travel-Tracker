@@ -3,8 +3,9 @@
 Plan trips, track journeys and collect passport stamps from around the world.
 A MERN app (MongoDB, Express, React, Node) written in TypeScript and built only on free services.
 
-**Current stage:** Phase 1 — real accounts: sign-up, login, email verification, password reset,
-profiles, onboarding quiz and an admin dashboard.
+**Current stage:** Phase 2 — trips: a day-by-day planner with drag and drop, budgets in any
+currency, packing lists, calendar export and a live currency converter.
+(Phase 1 added accounts, profiles, the onboarding quiz and the admin dashboard.)
 
 ## Project structure
 
@@ -62,6 +63,8 @@ The API runs on http://localhost:4000. Check it at http://localhost:4000/api/hea
 - `/` Explore, `/trips`, `/map`, `/community`, `/me`: the five main tabs
 - `/login`, `/signup`, `/forgot-password`: account screens
 - `/onboarding`: the 3-question welcome quiz
+- `/trips/:id`: one trip, with Plan, Budget and Packing tabs (`?tab=budget`, `?tab=packing`)
+- `/trips?new=1`: opens the "Plan a trip" form
 - `/me/settings`: edit profile, photo, password, delete account
 - `/admin`: dashboard for admins
 - `/styleguide`: every colour and component, plus a live API connection check
@@ -78,7 +81,7 @@ Components are in `client/src/components/ui` and are imported from one place:
 import { Button, Card, Stamp } from '@/components/ui';
 ```
 
-## API (Phase 1)
+## API
 
 Every request that changes data must send the header `X-TT-Client` (the React app does this).
 
@@ -101,6 +104,31 @@ Every request that changes data must send the header `X-TT-Client` (the React ap
 | DELETE | `/api/users/me` | logged in | Delete the account |
 | GET | `/api/admin/stats` | admins | Dashboard numbers |
 | GET | `/api/admin/users` | admins | Search and page through users |
+| GET / POST | `/api/trips` | logged in | List your trips (with totals) / plan a new one |
+| GET / PATCH / DELETE | `/api/trips/:id` | owner | One trip: read, edit, delete |
+| GET | `/api/trips/:id/calendar.ics` | owner | Calendar file of the trip and its plans |
+| POST | `/api/trips/:id/items` | owner | Add a plan to a day (or to Ideas) |
+| PATCH / DELETE | `/api/trips/:id/items/:itemId` | owner | Edit, move or remove a plan |
+| PUT | `/api/trips/:id/itinerary` | owner | Save the order after drag and drop |
+| POST | `/api/trips/:id/expenses` | owner | Log an expense in any currency |
+| PATCH / DELETE | `/api/trips/:id/expenses/:expenseId` | owner | Edit or remove an expense |
+| POST | `/api/trips/:id/packing` | owner | Add a packing item |
+| POST | `/api/trips/:id/packing/template` | owner | Add a ready-made list |
+| POST | `/api/trips/:id/packing/unpack-all` | owner | Untick everything |
+| PATCH / DELETE | `/api/trips/:id/packing/:itemId` | owner | Tick, rename or remove an item |
+| GET | `/api/currency/rates` | anyone | Today's exchange rates (1 USD = x) |
+
+Every trip endpoint answers with the whole updated trip, so the app always shows exactly what was saved.
+
+## Trips and money
+
+- Each trip keeps its budget in one currency. Expenses can be paid in any of 70+ currencies and
+  are converted when you add them (the rate used is saved with the expense).
+- Changing a trip's currency converts its expenses and planned costs (and, if you tick the box, the budget).
+- Exchange rates come from ExchangeRate-API's free open endpoint (includes BDT), with
+  Frankfurter (European Central Bank) as a backup. No API key is needed. The server keeps them
+  for 6 hours, so the providers are called only a few times a day.
+- Planning a trip earns 20 XP; deleting it takes the XP back.
 
 ## How login works
 
